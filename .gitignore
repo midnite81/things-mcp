@@ -5,6 +5,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/dist
+
+.idea/*
+!.idea/.gitignore
 /.pnp
 .pnp.js
 
