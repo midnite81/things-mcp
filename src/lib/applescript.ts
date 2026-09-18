@@ -34,6 +34,41 @@ export class DefaultAppleScriptRunner implements AppleScriptRunner {
 
 export const defaultAppleScriptRunner = new DefaultAppleScriptRunner();
 
+export const JSON_ESCAPE_APPLESCRIPT = `
+on jsonEscape(strVal)
+  if strVal is missing value then
+    return "\\\"\\\""
+  end if
+  set s to strVal as text
+  set AppleScript's text item delimiters to "\\\\"
+  set parts to text items of s
+  set AppleScript's text item delimiters to "\\\\\\\\"
+  set s to parts as text
+
+  set AppleScript's text item delimiters to "\\\""
+  set parts to text items of s
+  set AppleScript's text item delimiters to "\\\\\\\""
+  set s to parts as text
+
+  set AppleScript's text item delimiters to (ASCII character 10)
+  set parts to text items of s
+  set AppleScript's text item delimiters to "\\\\n"
+  set s to parts as text
+
+  set AppleScript's text item delimiters to (ASCII character 13)
+  set parts to text items of s
+  set AppleScript's text item delimiters to "\\\\r"
+  set s to parts as text
+
+  set AppleScript's text item delimiters to (ASCII character 9)
+  set parts to text items of s
+  set AppleScript's text item delimiters to "\\\\t"
+  set s to parts as text
+
+  return "\\\"" & s & "\\\""
+end jsonEscape
+`;
+
 export async function runAppleScript(
   script: string,
   args: string[] = [],

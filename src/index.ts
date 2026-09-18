@@ -12,6 +12,7 @@ import { handleListUpcoming, listUpcomingSchema } from './tools/listUpcoming.js'
 import { handleListProjects, listProjectsSchema } from './tools/listProjects.js';
 import { handleSearch, searchSchema } from './tools/search.js';
 import { handleCreateTodo, createTodoSchema } from './tools/createTodo.js';
+import { handleCreateProject, createProjectSchema } from './tools/createProject.js';
 import { handleUpdateTodo, updateTodoSchema } from './tools/updateTodo.js';
 import { handleCompleteTodo, completeTodoSchema } from './tools/completeTodo.js';
 import { ThingsError } from './lib/errors.js';
@@ -64,6 +65,11 @@ export function createServer(service: ThingsService = new ThingsService()) {
           inputSchema: zodToJsonSchema(createTodoSchema),
         },
         {
+          name: 'things_create_project',
+          description: 'Create a new Things project with title, notes, when, deadline, area, and tags.',
+          inputSchema: zodToJsonSchema(createProjectSchema),
+        },
+        {
           name: 'things_update_todo',
           description: 'Update an existing Things task by its unique ID.',
           inputSchema: zodToJsonSchema(updateTodoSchema),
@@ -94,6 +100,8 @@ export function createServer(service: ThingsService = new ThingsService()) {
           return await handleSearch(service, args);
         case 'things_create_todo':
           return await handleCreateTodo(service, args);
+        case 'things_create_project':
+          return await handleCreateProject(service, args);
         case 'things_update_todo':
           return await handleUpdateTodo(service, args);
         case 'things_complete_todo':

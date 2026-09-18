@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { spawnSync } from 'node:child_process';
 import { ThingsService, parseRawTodo, parseRawProject } from '../../src/services/things.js';
 import { AppleScriptRunner } from '../../src/lib/applescript.js';
 
@@ -111,6 +112,29 @@ describe('ThingsService', () => {
     expect(created.tags).toEqual(['ai']);
   });
 
+  it('createProject creates project and returns it', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify({
+      id: 'proj-new-id',
+      name: 'Release 2026-09-18',
+      area: 'Work',
+      status: 'open',
+    });
+
+    const service = new ThingsService(mock);
+    const created = await service.createProject({
+      title: 'Release 2026-09-18',
+      area: 'Work',
+    });
+
+    expect(created.id).toBe('proj-new-id');
+    expect(created.name).toBe('Release 2026-09-18');
+    expect(created.area).toBe('Work');
+    expect(created.status).toBe('open');
+    expect(mock.lastArgs[0]).toBe('Release 2026-09-18');
+    expect(mock.lastArgs[4]).toBe('Work');
+  });
+
   it('updateTodo passes correct fields', async () => {
     const mock = new MockAppleScriptRunner();
     mock.mockResponse = JSON.stringify({
@@ -192,5 +216,32 @@ describe('ThingsService', () => {
     expect(res.todos[0].name || res.todos[0].title).toBe('Search matched todo');
     expect(res.projects).toHaveLength(1);
     expect(res.projects[0].name).toBe('Search matched project');
+  });
+
+  it('all AppleScript scripts in ThingsService are syntactically valid', async () => {
+    const runner = new MockAppleScriptRunner();
+
+    const methods: Array<() => Promise<any>> = [
+      () => new ThingsService(runner).listToday(),
+      () => new ThingsService(runner).listInbox(),
+      () => new ThingsService(runner).listUpcoming({ days: 7 }),
+      () => new ThingsService(runner).listProjects(),
+      () => new ThingsService(runner).search({ query: 'test' }),
+      () => new ThingsService(runner).createTodo({ title: 'test', checklist: ['a'] }),
+      () => new ThingsService(runner).createTodo({ title: 'test' }),
+      () => new ThingsService(runner).createProject({ title: 'test' }),
+      () => new ThingsService(runner).updateTodo({ id: 'test' }),
+      () => new ThingsService(runner).completeTodo({ id: 'test' }),
+    ];
+
+    for (const fn of methods) {
+      runner.mockResponse = '[]';
+      await fn();
+      expect(runner.lastScript).not.toBe('');
+      // Test compilation using osacompile
+      const res = spawnSync('osacompile', ['-e', runner.lastScript]);
+      expect(res.status).toBe(0);
+      expect(res.stderr.toString()).toBe('');
+    }
   });
 });

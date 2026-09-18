@@ -177,7 +177,18 @@ Creates a new task in Things 3.
 - `tags` *(string[], optional)*: Tags to apply.
 - `checklist` *(string[], optional)*: List of checklist items.
 
-### 7. `things_update_todo`
+### 7. `things_create_project`
+Creates a new project in Things 3.
+
+**Arguments:**
+- `title` *(string, required)*: Project title / name.
+- `notes` *(string, optional)*: Notes or markdown description.
+- `when` *(string, optional)*: Schedule target (`today`, `tomorrow`, `anytime`, `someday`, or date string).
+- `deadline` *(string, optional)*: Due date / deadline.
+- `area` *(string, optional)*: Area name or ID to place the project under.
+- `tags` *(string[], optional)*: Tags to apply.
+
+### 8. `things_update_todo`
 Updates an existing task by Things ID.
 
 **Arguments:**
@@ -189,7 +200,7 @@ Updates an existing task by Things ID.
 - `project` *(string, optional)*: Target project name or ID.
 - `tags` *(string[], optional)*: New tags.
 
-### 8. `things_complete_todo`
+### 9. `things_complete_todo`
 Marks a task complete by its Things ID.
 
 **Arguments:**

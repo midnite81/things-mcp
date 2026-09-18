@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { handleListToday, listTodaySchema } from '../../src/tools/listToday.js';
 import { handleCreateTodo, createTodoSchema } from '../../src/tools/createTodo.js';
+import { handleCreateProject, createProjectSchema } from '../../src/tools/createProject.js';
 import { handleUpdateTodo, updateTodoSchema } from '../../src/tools/updateTodo.js';
 import { handleCompleteTodo, completeTodoSchema } from '../../src/tools/completeTodo.js';
 import { ThingsService } from '../../src/services/things.js';
@@ -17,6 +18,11 @@ describe('MCP Tools handlers and Zod Schemas', () => {
   it('validates createTodo schema correctly', () => {
     expect(() => createTodoSchema.parse({ title: 'Valid task' })).not.toThrow();
     expect(() => createTodoSchema.parse({})).toThrow();
+  });
+
+  it('validates createProject schema correctly', () => {
+    expect(() => createProjectSchema.parse({ title: 'Release 2026-09-18', area: 'Work' })).not.toThrow();
+    expect(() => createProjectSchema.parse({})).toThrow();
   });
 
   it('validates updateTodo schema correctly', () => {
@@ -75,5 +81,24 @@ describe('MCP Tools handlers and Zod Schemas', () => {
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.id).toBe('new-id');
     expect(parsed.title).toBe('Buy milk');
+  });
+
+  it('handleCreateProject returns formatted tool response', async () => {
+    const runner = new MockRunner(
+      JSON.stringify({
+        id: 'proj-id',
+        name: 'Release 2026-09-18',
+        area: 'Work',
+        status: 'open',
+      })
+    );
+    const service = new ThingsService(runner);
+    const result = await handleCreateProject(service, { title: 'Release 2026-09-18', area: 'Work' });
+
+    expect(result.content[0].type).toBe('text');
+    const parsed = JSON.parse(result.content[0].text);
+    expect(parsed.id).toBe('proj-id');
+    expect(parsed.name).toBe('Release 2026-09-18');
+    expect(parsed.area).toBe('Work');
   });
 });

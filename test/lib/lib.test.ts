@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseAppleScriptJson } from '../../src/lib/applescript.js';
+import { parseAppleScriptJson, JSON_ESCAPE_APPLESCRIPT, DefaultAppleScriptRunner } from '../../src/lib/applescript.js';
 import { normalizeError, ThingsNotInstalledError, ThingsPermissionError, ThingsNotFoundError } from '../../src/lib/errors.js';
 import { buildThingsAddUrl } from '../../src/lib/thingsUrl.js';
 
@@ -14,6 +14,19 @@ describe('applescript lib', () => {
     expect(parseAppleScriptJson('missing value')).toBeNull();
     expect(parseAppleScriptJson('null')).toBeNull();
     expect(parseAppleScriptJson('')).toBeNull();
+  });
+
+  it('correctly escapes special characters in jsonEscape AppleScript function', async () => {
+    const runner = new DefaultAppleScriptRunner();
+    const testScript = `
+on run argv
+  set testStr to "hello \\"world\\" \\\\ backslash and " & (ASCII character 10) & "newline"
+  return my jsonEscape(testStr)
+end run
+` + JSON_ESCAPE_APPLESCRIPT;
+
+    const res = await runner.execute(testScript);
+    expect(JSON.parse(res)).toBe('hello "world" \\ backslash and \nnewline');
   });
 });
 

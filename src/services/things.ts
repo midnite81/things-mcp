@@ -3,13 +3,19 @@ import {
   ThingsProject,
   ThingsSearchResult,
   CreateTodoInput,
+  CreateProjectInput,
   UpdateTodoInput,
   CompleteTodoInput,
   ListUpcomingInput,
   SearchInput,
   ThingsStatus,
 } from '../types/things.js';
-import { AppleScriptRunner, defaultAppleScriptRunner, parseAppleScriptJson } from '../lib/applescript.js';
+import {
+  AppleScriptRunner,
+  defaultAppleScriptRunner,
+  parseAppleScriptJson,
+  JSON_ESCAPE_APPLESCRIPT,
+} from '../lib/applescript.js';
 import { buildThingsAddUrl } from '../lib/thingsUrl.js';
 import { ThingsInvalidInputError, ThingsNotFoundError, ThingsUnsupportedError } from '../lib/errors.js';
 
@@ -122,40 +128,7 @@ on run argv
     return res
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, []);
     const rawList = parseAppleScriptJson<RawThingsTodo[]>(output) || [];
     return { items: rawList.map(parseRawTodo) };
@@ -208,40 +181,7 @@ on run argv
     return res
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, []);
     const rawList = parseAppleScriptJson<RawThingsTodo[]>(output) || [];
     return { items: rawList.map(parseRawTodo) };
@@ -326,40 +266,7 @@ on run argv
     return res
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, [daysArg]);
     const rawList = parseAppleScriptJson<RawThingsTodo[]>(output) || [];
     return { items: rawList.map(parseRawTodo) };
@@ -396,40 +303,7 @@ on run argv
     return res
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, []);
     const rawList = parseAppleScriptJson<RawThingsProject[]>(output) || [];
     return { projects: rawList.map(parseRawProject) };
@@ -486,7 +360,7 @@ on run argv
 
     set pRes to "["
     set isFirstP to true
-    set matchingProjects to (projects whose name contains q)
+    set matchingProjects to (projects whose name contains q or notes contains q)
     repeat with p in matchingProjects
       if not isFirstP then
         set pRes to pRes & ","
@@ -509,40 +383,7 @@ on run argv
     return "{\\"todos\\":" & tRes & ",\\"projects\\":" & pRes & "}"
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, [query]);
     const rawResult = parseAppleScriptJson<{ todos: RawThingsTodo[]; projects: RawThingsProject[] }>(output) || {
       todos: [],
@@ -562,12 +403,6 @@ end jsonEscape
     if (!input.title || input.title.trim() === '') {
       throw new ThingsInvalidInputError('Task title cannot be empty.');
     }
-
-    // If checklist is provided, Things AppleScript does not expose checklist items creation directly.
-    // However, Things URL scheme supports creating tasks with checklist items.
-    // If checklist is provided, we can use the Things URL scheme to create the todo and search for it or notify.
-    // But when checklist is NOT provided, pure AppleScript provides direct synchronous creation and returns the new task's ID immediately!
-    // If checklist IS provided, we trigger things:///add with checklist items and then find the newly created task.
 
     const title = input.title.trim();
     const notes = input.notes || '';
@@ -626,40 +461,7 @@ on run argv
     end if
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
       const output = await this.runner.execute(script, [url]);
       const raw = parseAppleScriptJson<RawThingsTodo>(output);
       if (raw && raw.id) {
@@ -689,27 +491,44 @@ on run argv
   set tTags to item 7 of argv
 
   tell application "Things3"
-    set targetContainer to missing value
+    set targetProject to missing value
     if tProject is not "" then
       try
-        set targetContainer to project tProject
+        set targetProject to project tProject
       on error
         try
-          set targetContainer to (first project whose id is tProject)
+          set targetProject to (first project whose id is tProject)
         on error
-          error "Project not found: " & tProject
+          try
+            set targetProject to (first project whose name is tProject)
+          on error
+            try
+              set targetProject to (first project whose name contains tProject)
+            on error
+              error "Project not found: " & tProject
+            end try
+          end try
         end try
       end try
     end if
 
-    if targetContainer is missing value and tArea is not "" then
+    set targetArea to missing value
+    if targetProject is missing value and tArea is not "" then
       try
-        set targetContainer to area tArea
+        set targetArea to area tArea
       on error
         try
-          set targetContainer to (first area whose id is tArea)
+          set targetArea to (first area whose id is tArea)
         on error
-          error "Area not found: " & tArea
+          try
+            set targetArea to (first area whose name is tArea)
+          on error
+            try
+              set targetArea to (first area whose name contains tArea)
+            on error
+              error "Area not found: " & tArea
+            end try
+          end try
         end try
       end try
     end if
@@ -721,6 +540,11 @@ on run argv
     if tTags is not "" then
       set newProps to newProps & {tag names:tTags}
     end if
+    if targetProject is not missing value then
+      set newProps to newProps & {project:targetProject}
+    else if targetArea is not missing value then
+      set newProps to newProps & {area:targetArea}
+    end if
 
     if tDeadline is not "" then
       try
@@ -731,11 +555,7 @@ on run argv
       end try
     end if
 
-    if targetContainer is not missing value then
-      set t to make new to do at targetContainer with properties newProps
-    else
-      set t to make new to do with properties newProps
-    end if
+    set t to make new to do with properties newProps
 
     -- Handle when: today, tomorrow, evening, anytime, someday, or date string
     if tWhen is not "" then
@@ -783,40 +603,7 @@ on run argv
     return "{\\"id\\":" & my jsonEscape(tid) & ",\\"name\\":" & my jsonEscape(tName) & ",\\"notes\\":" & my jsonEscape(tNotes) & ",\\"status\\":" & my jsonEscape(tStatus) & ",\\"dueDate\\":" & my jsonEscape(tDue) & ",\\"startDate\\":" & my jsonEscape(tStart) & ",\\"project\\":" & my jsonEscape(tProj) & ",\\"area\\":" & my jsonEscape(tArea) & ",\\"tagNames\\":" & my jsonEscape(tTagsOut) & "}"
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, [
       title,
       notes,
@@ -831,6 +618,122 @@ end jsonEscape
       throw new ThingsNotFoundError('Failed to create to do item.');
     }
     return parseRawTodo(raw);
+  }
+
+  /**
+   * Create a new Things project.
+   */
+  async createProject(input: CreateProjectInput): Promise<ThingsProject> {
+    if (!input.title || input.title.trim() === '') {
+      throw new ThingsInvalidInputError('Project title cannot be empty.');
+    }
+
+    const title = input.title.trim();
+    const notes = input.notes || '';
+    const when = input.when?.trim() || '';
+    const deadline = input.deadline?.trim() || '';
+    const area = input.area?.trim() || '';
+    const tags = input.tags ? input.tags.join(', ') : '';
+
+    const script = `
+on run argv
+  set pTitle to item 1 of argv
+  set pNotes to item 2 of argv
+  set pWhen to item 3 of argv
+  set pDeadline to item 4 of argv
+  set pArea to item 5 of argv
+  set pTags to item 6 of argv
+
+  tell application "Things3"
+    set targetArea to missing value
+    if pArea is not "" then
+      try
+        set targetArea to area pArea
+      on error
+        try
+          set targetArea to (first area whose id is pArea)
+        on error
+          try
+            set targetArea to (first area whose name is pArea)
+          on error
+            try
+              set targetArea to (first area whose name contains pArea)
+            on error
+              error "Area not found: " & pArea
+            end try
+          end try
+        end try
+      end try
+    end if
+
+    set newProps to {name:pTitle}
+    if pNotes is not "" then
+      set newProps to newProps & {notes:pNotes}
+    end if
+    if pTags is not "" then
+      set newProps to newProps & {tag names:pTags}
+    end if
+    if targetArea is not missing value then
+      set newProps to newProps & {area:targetArea}
+    end if
+
+    if pDeadline is not "" then
+      try
+        set dDate to (date pDeadline)
+        set newProps to newProps & {due date:dDate}
+      on error
+        -- try ISO parsing or fallback
+      end try
+    end if
+
+    set p to make new project with properties newProps
+
+    if pWhen is not "" then
+      set lowerWhen to pWhen
+      if lowerWhen is "today" then
+        move p to list "Today"
+      else if lowerWhen is "tomorrow" then
+        move p to list "Tomorrow"
+      else if lowerWhen is "someday" then
+        move p to list "Someday"
+      else if lowerWhen is "anytime" then
+        move p to list "Anytime"
+      else
+        try
+          set sDate to (date pWhen)
+          set activation date of p to sDate
+        on error
+          -- schedule fallback
+        end try
+      end if
+    end if
+
+    set pId to id of p
+    set pName to name of p
+    set pStatus to status of p as text
+    set pAreaName to ""
+    try
+      set pAreaName to name of area of p
+    end try
+
+    return "{\\"id\\":" & my jsonEscape(pId) & ",\\"name\\":" & my jsonEscape(pName) & ",\\"status\\":" & my jsonEscape(pStatus) & ",\\"area\\":" & my jsonEscape(pAreaName) & "}"
+  end tell
+end run
+` + JSON_ESCAPE_APPLESCRIPT;
+
+    const output = await this.runner.execute(script, [
+      title,
+      notes,
+      when,
+      deadline,
+      area,
+      tags,
+    ]);
+    const raw = parseAppleScriptJson<RawThingsProject>(output);
+    if (!raw) {
+      throw new ThingsNotFoundError('Failed to create project.');
+    }
+    return parseRawProject(raw);
   }
 
   /**
@@ -908,7 +811,17 @@ on run argv
             set p to (first project whose id is newProject)
             set project of t to p
           on error
-            error "Project not found: " & newProject
+            try
+              set p to (first project whose name is newProject)
+              set project of t to p
+            on error
+              try
+                set p to (first project whose name contains newProject)
+                set project of t to p
+              on error
+                error "Project not found: " & newProject
+              end try
+            end try
           end try
         end try
       end if
@@ -958,40 +871,7 @@ on run argv
     return "{\\"id\\":" & my jsonEscape(tid) & ",\\"name\\":" & my jsonEscape(tName) & ",\\"notes\\":" & my jsonEscape(tNotes) & ",\\"status\\":" & my jsonEscape(tStatus) & ",\\"dueDate\\":" & my jsonEscape(tDue) & ",\\"startDate\\":" & my jsonEscape(tStart) & ",\\"project\\":" & my jsonEscape(tProj) & ",\\"area\\":" & my jsonEscape(tArea) & ",\\"tagNames\\":" & my jsonEscape(tTagsOut) & "}"
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, [
       id,
       title,
@@ -1059,40 +939,7 @@ on run argv
     return "{\\"id\\":" & my jsonEscape(tid) & ",\\"name\\":" & my jsonEscape(tName) & ",\\"notes\\":" & my jsonEscape(tNotes) & ",\\"status\\":" & my jsonEscape(tStatus) & ",\\"dueDate\\":" & my jsonEscape(tDue) & ",\\"startDate\\":" & my jsonEscape(tStart) & ",\\"project\\":" & my jsonEscape(tProj) & ",\\"area\\":" & my jsonEscape(tArea) & ",\\"tagNames\\":" & my jsonEscape(tTagsOut) & "}"
   end tell
 end run
-
-on jsonEscape(strVal)
-  if strVal is missing value then
-    return "\\"\\""
-  end if
-  set s to strVal as text
-  set AppleScript's text item delimiters to "\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to "\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\t"
-  set s to parts as text
-
-  return "\"" & s & "\""
-end jsonEscape
-`;
+` + JSON_ESCAPE_APPLESCRIPT;
     const output = await this.runner.execute(script, [id]);
     const raw = parseAppleScriptJson<RawThingsTodo>(output);
     if (!raw) {

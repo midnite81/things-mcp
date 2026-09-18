@@ -35,6 +35,15 @@ export interface CreateTodoInput {
   checklist?: string[];
 }
 
+export interface CreateProjectInput {
+  title: string;
+  notes?: string;
+  when?: string;
+  deadline?: string;
+  area?: string;
+  tags?: string[];
+}
+
 export interface UpdateTodoInput {
   id: string;
   title?: string;
