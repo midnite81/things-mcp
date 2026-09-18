@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseAppleScriptJson, JSON_ESCAPE_APPLESCRIPT, DefaultAppleScriptRunner } from '../../src/lib/applescript.js';
 import { normalizeError, ThingsNotInstalledError, ThingsPermissionError, ThingsNotFoundError } from '../../src/lib/errors.js';
-import { buildThingsAddUrl } from '../../src/lib/thingsUrl.js';
+import { buildThingsAddUrl, buildThingsUpdateUrl } from '../../src/lib/thingsUrl.js';
 
 describe('applescript lib', () => {
   it('parses valid JSON from AppleScript output', () => {
@@ -70,5 +70,19 @@ describe('thingsUrl lib', () => {
     expect(url).toContain('list=Home');
     expect(url).toContain('tags=groceries%2Cerrands');
     expect(url).toContain('checklist-items=Almond+milk%0AOat+milk');
+  });
+
+  it('builds an authenticated Things checklist update URL', () => {
+    const url = buildThingsUpdateUrl({
+      id: 'todo-id',
+      authToken: 'test-token',
+      checklistMode: 'append',
+      checklistItems: ['Cheese', 'Bread'],
+    });
+
+    expect(url).toContain('things:///update?');
+    expect(url).toContain('id=todo-id');
+    expect(url).toContain('auth-token=test-token');
+    expect(url).toContain('append-checklist-items=Cheese%0ABread');
   });
 });

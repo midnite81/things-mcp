@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { ThingsService, parseRawTodo, parseRawProject } from '../../src/services/things.js';
+import { ThingsService, parseRawTodo, parseRawProject, parseRawListGroup, parseRawTag } from '../../src/services/things.js';
 import { AppleScriptRunner } from '../../src/lib/applescript.js';
 
 class MockAppleScriptRunner implements AppleScriptRunner {
@@ -58,6 +58,28 @@ describe('ThingsService', () => {
       area: 'Marketing',
       status: 'open',
     });
+  });
+
+  it('parses raw List Group correctly', () => {
+    expect(parseRawListGroup({ id: 'area-1', name: 'Work' })).toEqual({
+      id: 'area-1',
+      name: 'Work',
+    });
+  });
+
+  it('parses raw tags correctly', () => {
+    expect(parseRawTag({ id: 'tag-1', name: 'Urgent' })).toEqual({ id: 'tag-1', name: 'Urgent' });
+  });
+
+  it('lists List Groups, optionally filtered by name', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify([{ id: 'area-1', name: 'Work' }]);
+
+    const service = new ThingsService(mock);
+    const result = await service.listGroups({ query: 'work' });
+
+    expect(result).toEqual({ listGroups: [{ id: 'area-1', name: 'Work' }] });
+    expect(mock.lastArgs).toEqual(['work']);
   });
 
   it('listToday returns formatted items', async () => {
@@ -133,6 +155,145 @@ describe('ThingsService', () => {
     expect(created.status).toBe('open');
     expect(mock.lastArgs[0]).toBe('Release 2026-09-18');
     expect(mock.lastArgs[4]).toBe('Work');
+  });
+
+  it('createList creates a list in the requested List Group', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify({
+      id: 'list-new-id',
+      name: 'Sprint 269',
+      area: 'Work',
+      status: 'open',
+    });
+
+    const service = new ThingsService(mock);
+    const created = await service.createList({ title: 'Sprint 269', listGroup: 'Work' });
+
+    expect(created).toMatchObject({ id: 'list-new-id', name: 'Sprint 269', area: 'Work' });
+    expect(mock.lastArgs[0]).toBe('Sprint 269');
+    expect(mock.lastArgs[4]).toBe('Work');
+  });
+
+  it('lists open tasks in a selected list', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify([
+      {
+        id: 'todo-1',
+        name: 'Prepare demo',
+        notes: '',
+        status: 'open',
+        dueDate: '',
+        startDate: '',
+        project: 'Sprint 269',
+        area: 'Work',
+        tagNames: '',
+      },
+    ]);
+
+    const service = new ThingsService(mock);
+    const result = await service.listListItems({ list: 'Sprint 269' });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].title).toBe('Prepare demo');
+    expect(mock.lastArgs).toEqual(['Sprint 269', 'false']);
+  });
+
+  it('updateList passes list properties and returns the updated list', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify({
+      id: 'list-id',
+      name: 'Sprint 269',
+      area: 'Work',
+      status: 'open',
+    });
+
+    const service = new ThingsService(mock);
+    const updated = await service.updateList({ id: 'list-id', title: 'Sprint 269', listGroup: 'Work' });
+
+    expect(updated).toMatchObject({ id: 'list-id', name: 'Sprint 269', area: 'Work' });
+    expect(mock.lastArgs).toEqual([
+      'list-id',
+      'Sprint 269',
+      '__UNSET__',
+      '__UNSET__',
+      '__UNSET__',
+      'Work',
+      '__UNSET__',
+    ]);
+  });
+
+  it('gets tasks and lists by stable ID', async () => {
+    const mock = new MockAppleScriptRunner();
+    const service = new ThingsService(mock);
+
+    mock.mockResponse = JSON.stringify({
+      id: 'todo-id', name: 'Prepare demo', notes: '', status: 'open', dueDate: '', startDate: '', project: 'Sprint 269', area: 'Work', tagNames: '',
+    });
+    expect((await service.getTodo({ id: 'todo-id' })).title).toBe('Prepare demo');
+    expect(mock.lastArgs).toEqual(['todo-id']);
+
+    mock.mockResponse = JSON.stringify({ id: 'list-id', name: 'Sprint 269', area: 'Work', status: 'open' });
+    expect((await service.getList({ id: 'list-id' })).name).toBe('Sprint 269');
+    expect(mock.lastArgs).toEqual(['list-id']);
+  });
+
+  it('changes a list lifecycle status by stable ID', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify({ id: 'list-id', name: 'Sprint 269', area: 'Work', status: 'completed' });
+    const updated = await new ThingsService(mock).setListStatus({ id: 'list-id', status: 'completed' });
+
+    expect(updated.status).toBe('completed');
+    expect(mock.lastArgs).toEqual(['list-id', 'completed']);
+  });
+
+  it('manages List Groups and tags by stable ID', async () => {
+    const mock = new MockAppleScriptRunner();
+    const service = new ThingsService(mock);
+
+    mock.mockResponse = JSON.stringify({ id: 'area-id', name: 'Work' });
+    expect((await service.createListGroup({ name: 'Work' })).name).toBe('Work');
+    expect(mock.lastArgs).toEqual(['Work', '']);
+
+    mock.mockResponse = JSON.stringify({ id: 'area-id', name: 'Work 2' });
+    expect((await service.updateListGroup({ id: 'area-id', name: 'Work 2' })).name).toBe('Work 2');
+    expect(mock.lastArgs).toEqual(['area-id', 'Work 2', '__UNSET__']);
+
+    mock.mockResponse = JSON.stringify({ id: 'area-id', deleted: true });
+    expect(await service.deleteListGroup({ id: 'area-id' })).toEqual({ id: 'area-id', deleted: true });
+
+    mock.mockResponse = JSON.stringify([{ id: 'tag-id', name: 'Urgent' }]);
+    expect(await service.listTags()).toEqual({ tags: [{ id: 'tag-id', name: 'Urgent' }] });
+
+    mock.mockResponse = JSON.stringify({ id: 'tag-id', name: 'Urgent' });
+    expect((await service.createTag({ name: 'Urgent' })).name).toBe('Urgent');
+    expect(mock.lastArgs).toEqual(['Urgent', '']);
+
+    mock.mockResponse = JSON.stringify({ id: 'tag-id', name: 'Important' });
+    expect((await service.updateTag({ id: 'tag-id', name: 'Important' })).name).toBe('Important');
+    expect(mock.lastArgs).toEqual(['tag-id', 'Important', '__UNSET__']);
+
+    mock.mockResponse = JSON.stringify({ id: 'tag-id', deleted: true });
+    expect(await service.deleteTag({ id: 'tag-id' })).toEqual({ id: 'tag-id', deleted: true });
+  });
+
+  it('moves a task and updates its checklist', async () => {
+    const mock = new MockAppleScriptRunner();
+    const service = new ThingsService(mock);
+    const todo = JSON.stringify({
+      id: 'todo-id', name: 'Prepare demo', notes: '', status: 'open', dueDate: '', startDate: '', project: 'Sprint 269', area: 'Work', tagNames: '',
+    });
+
+    mock.mockResponse = todo;
+    expect((await service.moveTodo({ id: 'todo-id', list: 'Sprint 269' })).project).toBe('Sprint 269');
+    expect(mock.lastArgs[0]).toBe('todo-id');
+    expect(mock.lastArgs[5]).toBe('Sprint 269');
+
+    mock.mockResponse = todo;
+    expect((await service.updateTodoChecklist({
+      id: 'todo-id', authToken: 'test-token', mode: 'append', items: ['Book venue'],
+    })).title).toBe('Prepare demo');
+    expect(mock.lastArgs[1]).toBe('todo-id');
+    expect(mock.lastArgs[0]).toContain('append-checklist-items=Book+venue');
   });
 
   it('updateTodo passes correct fields', async () => {
@@ -226,10 +387,38 @@ describe('ThingsService', () => {
       () => new ThingsService(runner).listInbox(),
       () => new ThingsService(runner).listUpcoming({ days: 7 }),
       () => new ThingsService(runner).listProjects(),
+      () => new ThingsService(runner).listGroups(),
       () => new ThingsService(runner).search({ query: 'test' }),
       () => new ThingsService(runner).createTodo({ title: 'test', checklist: ['a'] }),
       () => new ThingsService(runner).createTodo({ title: 'test' }),
       () => new ThingsService(runner).createProject({ title: 'test' }),
+      () => new ThingsService(runner).createList({ title: 'test', listGroup: 'Work' }),
+      () => new ThingsService(runner).listListItems({ list: 'test' }),
+      () => new ThingsService(runner).updateList({ id: 'test', title: 'Updated test' }),
+      () => new ThingsService(runner).getTodo({ id: 'test' }),
+      () => new ThingsService(runner).getList({ id: 'test' }),
+      () => new ThingsService(runner).setListStatus({ id: 'test', status: 'completed' }),
+      () => new ThingsService(runner).createListGroup({ name: 'test' }),
+      () => new ThingsService(runner).updateListGroup({ id: 'test', name: 'Updated test' }),
+      () => new ThingsService(runner).deleteListGroup({ id: 'test' }),
+      () => new ThingsService(runner).listTags(),
+      () => new ThingsService(runner).createTag({ name: 'test' }),
+      () => new ThingsService(runner).updateTag({ id: 'test', name: 'Updated test' }),
+      () => new ThingsService(runner).deleteTag({ id: 'test' }),
+      () => new ThingsService(runner).moveTodo({ id: 'test', list: 'Destination' }),
+      () => new ThingsService(runner).updateTodoChecklist({ id: 'test', authToken: 'test-token', mode: 'replace', items: [] }),
+      () => new ThingsService(runner).listTodos({ source: 'logbook', status: 'completed' }),
+      () => new ThingsService(runner).setTodoStatus({ id: 'test', status: 'canceled' }),
+      () => new ThingsService(runner).moveTodo({ id: 'test', listGroup: 'Work' }),
+      () => new ThingsService(runner).deleteTodo({ id: 'test' }),
+      () => new ThingsService(runner).deleteList({ id: 'test' }),
+      () => new ThingsService(runner).duplicateTodo({ id: 'test', authToken: 'test-token', title: 'Copy' }),
+      () => new ThingsService(runner).duplicateList({ id: 'test', authToken: 'test-token', title: 'Copy' }),
+      () => new ThingsService(runner).setTodoReminder({ id: 'test', authToken: 'test-token', when: '2026-09-20@14:00' }),
+      () => new ThingsService(runner).listLists({ source: 'logbook', status: 'completed' }),
+      () => new ThingsService(runner).augmentList({ id: 'test', addTags: ['Important'] }),
+      () => new ThingsService(runner).revealItem({ id: 'test' }),
+      () => new ThingsService(runner).emptyTrash('EMPTY_TRASH'),
       () => new ThingsService(runner).updateTodo({ id: 'test' }),
       () => new ThingsService(runner).completeTodo({ id: 'test' }),
     ];

@@ -14,6 +14,22 @@ export interface ThingsUrlOptions {
   reveal?: boolean;
 }
 
+export interface ThingsUpdateUrlOptions {
+  id: string;
+  authToken: string;
+  checklistItems: string[];
+  checklistMode: 'replace' | 'prepend' | 'append';
+}
+
+export interface ThingsItemUpdateUrlOptions {
+  id: string;
+  authToken: string;
+  title?: string;
+  when?: string;
+  duplicate?: boolean;
+  project?: boolean;
+}
+
 export function buildThingsAddUrl(options: ThingsUrlOptions): string {
   const params = new URLSearchParams();
 
@@ -38,4 +54,34 @@ export function buildThingsAddUrl(options: ThingsUrlOptions): string {
   }
 
   return `things:///add?${params.toString()}`;
+}
+
+/**
+ * Build an authenticated Things URL-scheme request for checklist mutation.
+ * The token is intentionally supplied per request and is never persisted.
+ */
+export function buildThingsUpdateUrl(options: ThingsUpdateUrlOptions): string {
+  const params = new URLSearchParams();
+  params.append('id', options.id);
+  params.append('auth-token', options.authToken);
+
+  const checklistParameter =
+    options.checklistMode === 'prepend'
+      ? 'prepend-checklist-items'
+      : options.checklistMode === 'append'
+        ? 'append-checklist-items'
+        : 'checklist-items';
+  params.append(checklistParameter, options.checklistItems.join('\n'));
+
+  return `things:///update?${params.toString()}`;
+}
+
+export function buildThingsItemUpdateUrl(options: ThingsItemUpdateUrlOptions): string {
+  const params = new URLSearchParams();
+  params.append('id', options.id);
+  params.append('auth-token', options.authToken);
+  if (options.title !== undefined) params.append('title', options.title);
+  if (options.when !== undefined) params.append('when', options.when);
+  if (options.duplicate !== undefined) params.append('duplicate', String(options.duplicate));
+  return `things:///${options.project ? 'update-project' : 'update'}?${params.toString()}`;
 }
