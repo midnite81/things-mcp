@@ -1,15 +1,22 @@
+# Temporary files and generated build output
 /tmp
 /out-tsc
+/dist
 
+# Installed dependencies and package-manager debug logs
 /node_modules
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-/dist
 
-.idea/*
-!.idea/.gitignore
+# Yarn Plug'n'Play files
 /.pnp
 .pnp.js
 
+# IDE-specific settings and metadata
+.idea/*
+!.idea/.gitignore
 .vscode/*
+
+# Local project configuration
+.midnite.config.json
