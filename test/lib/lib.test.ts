@@ -16,9 +16,11 @@ describe('applescript lib', () => {
     expect(parseAppleScriptJson('')).toBeNull();
   });
 
-  it('correctly escapes special characters in jsonEscape AppleScript function', async () => {
-    const runner = new DefaultAppleScriptRunner();
-    const testScript = `
+  it.skipIf(process.platform !== 'darwin')(
+    'correctly escapes special characters in jsonEscape AppleScript function',
+    async () => {
+      const runner = new DefaultAppleScriptRunner();
+      const testScript = `
 on run argv
   set quoteChar to character id 34
   set slashChar to character id 92
@@ -28,9 +30,10 @@ on run argv
 end run
 ` + JSON_ESCAPE_APPLESCRIPT;
 
-    const res = await runner.execute(testScript);
-    expect(JSON.parse(res)).toBe('hello "world" \\ backslash and \nnewline');
-  });
+      const res = await runner.execute(testScript);
+      expect(JSON.parse(res)).toBe('hello "world" \\ backslash and \nnewline');
+    },
+  );
 });
 
 describe('errors lib', () => {
