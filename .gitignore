@@ -14,8 +14,7 @@ yarn-error.log*
 .pnp.js
 
 # IDE-specific settings and metadata
-.idea/*
-!.idea/.gitignore
+.idea/
 .vscode/*
 
 # Local project configuration
