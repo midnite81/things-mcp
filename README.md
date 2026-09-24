@@ -34,6 +34,17 @@ In this MCP server:
 - Node.js (v18+ recommended, tested with v20+)
 - npm
 
+### Run with `npx` (after the package is published)
+
+No global installation is needed. Configure your MCP client to run:
+
+```bash
+npx -y @midnite81/things-mcp
+```
+
+The `-y` flag lets `npx` install the package without prompting. The first
+launch may trigger the macOS Automation permission prompt described below.
+
 ### 1. Install Dependencies
 ```bash
 npm install
@@ -77,10 +88,8 @@ Add the server configuration to `~/Library/Application Support/Claude/claude_des
 {
   "mcpServers": {
     "things": {
-      "command": "node",
-      "args": [
-        "/Users/midnite/code/things-mcp/dist/index.js"
-      ]
+      "command": "npx",
+      "args": ["-y", "@midnite81/things-mcp"]
     }
   }
 }
@@ -91,8 +100,8 @@ For clients using TOML configuration (such as Codex CLI or IDE plugins):
 
 ```toml
 [mcp_servers.things]
-command = "node"
-args = ["/Users/midnite/code/things-mcp/dist/index.js"]
+command = "npx"
+args = ["-y", "@midnite81/things-mcp"]
 ```
 
 ### Generic JSON Configuration
@@ -100,8 +109,8 @@ For clients accepting stdio server commands in JSON:
 
 ```json
 {
-  "command": "node",
-  "args": ["/Users/midnite/code/things-mcp/dist/index.js"],
+  "command": "npx",
+  "args": ["-y", "@midnite81/things-mcp"],
   "env": {}
 }
 ```

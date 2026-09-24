@@ -1,28 +1,54 @@
 {
-  "name": "things-mcp",
+  "name": "@midnite81/things-mcp",
   "version": "1.0.0",
   "description": "A safe MCP server for Things 3 on macOS",
+  "author": "Simon Rogers <webdev@midnite.uk>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/midnite81/things-mcp.git"
+  },
+  "homepage": "https://github.com/midnite81/things-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/midnite81/things-mcp/issues"
+  },
+  "keywords": [
+    "mcp",
+    "things-3",
+    "things3",
+    "macos"
+  ],
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "bin": {
     "things-mcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
+    "prepack": "npm run build",
+    "prepublishOnly": "npm test && npm run typecheck",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.3",
-    "zod": "^3.25.76"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@types/node": "^25.3.3",
-    "tsx": "^4.21.0",
-    "typescript": "^5.8.2",
-    "vitest": "^4.1.0"
+    "@types/node": "^26.6.1",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11"
   },
-  "private": true
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
