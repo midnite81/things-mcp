@@ -38,7 +38,6 @@ jobs:
         with:
           ref: ${{ vars.RELEASE_BASE_BRANCH }}
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_GITHUB_TOKEN || github.token }}
 
       - name: Validate release configuration
         run: |
@@ -92,6 +91,7 @@ jobs:
         run: |
           tag="v$RELEASE_VERSION"
           git tag -a "$tag" -m "Release $tag"
+          git remote set-url origin "https://x-access-token:$RELEASE_GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
           git push origin "HEAD:$RELEASE_BASE_BRANCH" "refs/tags/$tag"
 
       - name: Create GitHub release with OpenAI release notes
