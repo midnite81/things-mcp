@@ -57,6 +57,7 @@ import { handleUpdateTodo, updateTodoSchema } from './tools/updateTodo.js';
 import { handleCompleteTodo, completeTodoSchema } from './tools/completeTodo.js';
 import { ThingsError } from './lib/errors.js';
 import { zodToJsonSchema } from './lib/schemaHelper.js';
+import { isMainModule } from './lib/isMainModule.js';
 
 export function createServer(service: ThingsService = new ThingsService()) {
   const server = new Server(
@@ -368,7 +369,7 @@ async function main() {
   console.error('[things-mcp] Things MCP server running on stdio');
 }
 
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1])) {
+if (isMainModule(import.meta.url)) {
   main().catch((err) => {
     console.error('[things-mcp] Fatal error:', err);
     process.exit(1);
