@@ -1,6 +1,6 @@
 {
   "name": "@midnite81/things-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A safe MCP server for Things 3 on macOS",
   "author": "Simon Rogers <webdev@midnite.uk>",
   "repository": {
