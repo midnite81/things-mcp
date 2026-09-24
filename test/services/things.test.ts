@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { spawnSync } from 'node:child_process';
 import { ThingsService, parseRawTodo, parseRawProject, parseRawListGroup, parseRawTag } from '../../src/services/things.js';
 import { AppleScriptRunner } from '../../src/lib/applescript.js';
 
@@ -172,6 +171,36 @@ describe('ThingsService', () => {
     expect(created).toMatchObject({ id: 'list-new-id', name: 'Sprint 269', area: 'Work' });
     expect(mock.lastArgs[0]).toBe('Sprint 269');
     expect(mock.lastArgs[4]).toBe('Work');
+  });
+
+  it('createList preserves the requested heading and task order', async () => {
+    const mock = new MockAppleScriptRunner();
+    mock.mockResponse = JSON.stringify({
+      id: 'list-new-id',
+      name: 'Release',
+      area: 'Work',
+      status: 'open',
+    });
+
+    const service = new ThingsService(mock);
+    await service.createList({
+      title: 'Release',
+      listGroup: 'Work',
+      items: [
+        { type: 'heading', title: 'RFQA' },
+        { type: 'to-do', title: 'Check ticket', completed: true },
+        { type: 'heading', title: 'Failed' },
+      ],
+    });
+
+    const data = new URL(mock.lastArgs[0]).searchParams.get('data');
+    expect(JSON.parse(data!).at(0).attributes.items.map((item: { attributes: { title: string } }) => item.attributes.title)).toEqual([
+      'RFQA',
+      'Check ticket',
+      'Failed',
+    ]);
+    expect(mock.lastArgs[1]).toBe('Release');
+    expect(mock.lastScript).toContain('open location targetUrl');
   });
 
   it('lists open tasks in a selected list', async () => {
@@ -379,7 +408,7 @@ describe('ThingsService', () => {
     expect(res.projects[0].name).toBe('Search matched project');
   });
 
-  it('all AppleScript scripts in ThingsService are syntactically valid', async () => {
+  it('ThingsService scripts have the expected AppleScript handler structure', async () => {
     const runner = new MockAppleScriptRunner();
 
     const methods: Array<() => Promise<any>> = [
@@ -427,10 +456,10 @@ describe('ThingsService', () => {
       runner.mockResponse = '[]';
       await fn();
       expect(runner.lastScript).not.toBe('');
-      // Test compilation using osacompile
-      const res = spawnSync('osacompile', ['-e', runner.lastScript]);
-      expect(res.status).toBe(0);
-      expect(res.stderr.toString()).toBe('');
+      // Things-specific scripting terms require the Things application dictionary,
+      // which osacompile cannot resolve in an isolated test process.
+      expect(runner.lastScript).toContain('on run argv');
+      expect(runner.lastScript).toContain('end run');
     }
   });
 });

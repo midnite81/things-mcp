@@ -33,6 +33,16 @@ describe('MCP Tools handlers and Zod Schemas', () => {
     expect(() => listGroupsSchema.parse({ query: 'Work' })).not.toThrow();
     expect(() => listGroupsSchema.parse({ query: '' })).toThrow();
     expect(() => createListSchema.parse({ title: 'Sprint 269', listGroup: 'Work' })).not.toThrow();
+    expect(() =>
+      createListSchema.parse({
+        title: 'Release',
+        listGroup: 'Work',
+        items: [
+          { type: 'heading', title: 'RFQA' },
+          { type: 'to-do', title: 'Check ticket' },
+        ],
+      })
+    ).not.toThrow();
     expect(() => createListSchema.parse({ title: 'Sprint 269' })).toThrow();
   });
 

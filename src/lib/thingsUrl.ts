@@ -30,6 +30,13 @@ export interface ThingsItemUpdateUrlOptions {
   project?: boolean;
 }
 
+export function buildThingsJsonUrl(data: unknown, reveal = false): string {
+  const params = new URLSearchParams();
+  params.append('data', JSON.stringify(data));
+  if (reveal) params.append('reveal', 'true');
+  return `things:///json?${params.toString()}`;
+}
+
 export function buildThingsAddUrl(options: ThingsUrlOptions): string {
   const params = new URLSearchParams();
 

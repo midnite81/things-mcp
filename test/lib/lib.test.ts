@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseAppleScriptJson, JSON_ESCAPE_APPLESCRIPT, DefaultAppleScriptRunner } from '../../src/lib/applescript.js';
 import { normalizeError, ThingsNotInstalledError, ThingsPermissionError, ThingsNotFoundError } from '../../src/lib/errors.js';
-import { buildThingsAddUrl, buildThingsUpdateUrl } from '../../src/lib/thingsUrl.js';
+import { buildThingsAddUrl, buildThingsJsonUrl, buildThingsUpdateUrl } from '../../src/lib/thingsUrl.js';
 
 describe('applescript lib', () => {
   it('parses valid JSON from AppleScript output', () => {
@@ -20,7 +20,10 @@ describe('applescript lib', () => {
     const runner = new DefaultAppleScriptRunner();
     const testScript = `
 on run argv
-  set testStr to "hello \\"world\\" \\\\ backslash and " & (ASCII character 10) & "newline"
+  set quoteChar to character id 34
+  set slashChar to character id 92
+  set lineFeedChar to character id 10
+  set testStr to "hello " & quoteChar & "world" & quoteChar & " " & slashChar & " backslash and " & lineFeedChar & "newline"
   return my jsonEscape(testStr)
 end run
 ` + JSON_ESCAPE_APPLESCRIPT;
@@ -84,5 +87,24 @@ describe('thingsUrl lib', () => {
     expect(url).toContain('id=todo-id');
     expect(url).toContain('auth-token=test-token');
     expect(url).toContain('append-checklist-items=Cheese%0ABread');
+  });
+
+  it('builds a JSON URL for ordered project structures', () => {
+    const url = buildThingsJsonUrl([
+      {
+        type: 'project',
+        attributes: {
+          title: 'Release',
+          items: [
+            { type: 'heading', attributes: { title: 'RFQA' } },
+            { type: 'to-do', attributes: { title: 'Check ticket' } },
+          ],
+        },
+      },
+    ]);
+
+    const data = new URL(url).searchParams.get('data');
+    expect(data).not.toBeNull();
+    expect(JSON.parse(data!)[0].attributes.items.map((item: { type: string }) => item.type)).toEqual(['heading', 'to-do']);
   });
 });

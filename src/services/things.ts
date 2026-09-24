@@ -7,6 +7,7 @@ import {
   CreateTodoInput,
   CreateProjectInput,
   CreateListInput,
+  CreateListItem,
   ListGroupsInput,
   ListListItemsInput,
   UpdateListInput,
@@ -38,7 +39,7 @@ import {
   parseAppleScriptJson,
   JSON_ESCAPE_APPLESCRIPT,
 } from '../lib/applescript.js';
-import { buildThingsAddUrl, buildThingsUpdateUrl, buildThingsItemUpdateUrl } from '../lib/thingsUrl.js';
+import { buildThingsAddUrl, buildThingsJsonUrl, buildThingsUpdateUrl, buildThingsItemUpdateUrl } from '../lib/thingsUrl.js';
 import { ThingsInvalidInputError, ThingsNotFoundError, ThingsUnsupportedError } from '../lib/errors.js';
 
 export interface RawThingsTodo {
@@ -896,6 +897,10 @@ end run
    * Create a Things list (a project) under a List Group (an AppleScript area).
    */
   async createList(input: CreateListInput): Promise<ThingsProject> {
+    if (input.items && input.items.length > 0) {
+      return this.createStructuredList(input);
+    }
+
     return this.createProject({
       title: input.title,
       notes: input.notes,
@@ -904,6 +909,91 @@ end run
       area: input.listGroup,
       tags: input.tags,
     });
+  }
+
+  /**
+   * Create a list and its ordered headings/tasks through Things' JSON URL command.
+   * Things only supports creating headings as part of a new project structure.
+   */
+  private async createStructuredList(input: CreateListInput): Promise<ThingsProject> {
+    if (!input.title || input.title.trim() === '') {
+      throw new ThingsInvalidInputError('List title cannot be empty.');
+    }
+    if (!input.listGroup || input.listGroup.trim() === '') {
+      throw new ThingsInvalidInputError('List Group cannot be empty.');
+    }
+
+    const items = input.items ?? [];
+    const data = [
+      {
+        type: 'project',
+        attributes: {
+          title: input.title.trim(),
+          ...(input.notes !== undefined ? { notes: input.notes } : {}),
+          ...(input.when !== undefined ? { when: input.when } : {}),
+          ...(input.deadline !== undefined ? { deadline: input.deadline } : {}),
+          ...(input.listGroup ? { area: input.listGroup } : {}),
+          ...(input.tags !== undefined ? { tags: input.tags } : {}),
+          items: items.map((item) => this.toThingsJsonItem(item)),
+        },
+      },
+    ];
+    const url = buildThingsJsonUrl(data);
+    const title = input.title.trim();
+    const script = `
+on run argv
+  set targetUrl to item 1 of argv
+  set targetTitle to item 2 of argv
+  tell application "Things3"
+    open location targetUrl
+    delay 0.3
+    set matchingProjects to (projects whose name is targetTitle)
+    if (count of matchingProjects) > 0 then
+      set p to last item of matchingProjects
+${PROJECT_RESPONSE_APPLESCRIPT}    else
+      return "{}"
+    end if
+  end tell
+end run
+` + JSON_ESCAPE_APPLESCRIPT;
+    const raw = parseAppleScriptJson<RawThingsProject>(await this.runner.execute(script, [url, title]));
+    if (!raw || !raw.id) {
+      throw new ThingsNotFoundError('Failed to create structured list.');
+    }
+    return parseRawProject(raw);
+  }
+
+  private toThingsJsonItem(item: CreateListItem) {
+    if (item.type === 'heading') {
+      return {
+        type: 'heading',
+        attributes: {
+          title: item.title,
+          ...(item.archived !== undefined ? { archived: item.archived } : {}),
+        },
+      };
+    }
+
+    return {
+      type: 'to-do',
+      attributes: {
+        title: item.title,
+        ...(item.notes !== undefined ? { notes: item.notes } : {}),
+        ...(item.when !== undefined ? { when: item.when } : {}),
+        ...(item.deadline !== undefined ? { deadline: item.deadline } : {}),
+        ...(item.tags !== undefined ? { tags: item.tags } : {}),
+        ...(item.checklist !== undefined
+          ? {
+              'checklist-items': item.checklist.map((title) => ({
+                type: 'checklist-item',
+                attributes: { title },
+              })),
+            }
+          : {}),
+        ...(item.completed !== undefined ? { completed: item.completed } : {}),
+        ...(item.canceled !== undefined ? { canceled: item.canceled } : {}),
+      },
+    };
   }
 
   /**

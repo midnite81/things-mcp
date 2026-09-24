@@ -174,6 +174,7 @@ Creates a Things list under a List Group. In Things' data model, a list is a pro
 - `title` *(string, required)*: Name of the new list.
 - `listGroup` *(string, required)*: List Group name or stable ID, for example `Work`.
 - `notes`, `when`, `deadline`, `tags` *(optional)*: Project/list metadata.
+- `items` *(optional)*: An ordered array of `heading` and `to-do` objects. A heading has `title` and optional `archived`; a task has `title` plus optional `notes`, `when`, `deadline`, `tags`, `checklist`, `completed`, and `canceled`.
 
 ### 8. `things_list_list_items`
 Returns the tasks in a selected list, using its name or stable ID. Completed and cancelled tasks are omitted unless `includeCompleted` is `true`.
@@ -324,5 +325,5 @@ All three require an `id` and caller-supplied `authToken`; the token is not pers
 
 - **Checklists**: Things 3 AppleScript does not expose individual checklist items. This MCP supports replacing or adding checklist text through the authorised Things URL scheme, but cannot read, complete, remove, or edit a single checklist row in place.
 - **Areas**: Things AppleScript allows querying and setting areas for tasks and projects; tasks nested in projects inherit the project's area.
-- **Headings within Projects**: Things' documented AppleScript and URL scheme APIs can target an existing heading but cannot create, list, rename, or delete headings in an existing project. Those operations are deliberately not exposed by this MCP.
+- **Headings within Projects**: Things' JSON URL command can create headings, and their order is the order of the `items` array passed to `things_create_list`. The documented APIs can target an existing heading but cannot create, list, rename, or delete headings in an existing project; this MCP therefore supports headings when creating a new list, not adding them to an existing list.
 - **Restoring from Trash**: Things documents moving items to Trash but does not document a supported AppleScript or URL-scheme restore operation. The MCP can list Trash items but deliberately cannot claim to restore them.

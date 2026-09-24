@@ -152,7 +152,7 @@ export function createServer(service: ThingsService = new ThingsService()) {
         },
         {
           name: 'things_create_list',
-          description: 'Create a Things list under a List Group by name or stable ID. Lists are Things projects; List Groups are Things areas.',
+          description: 'Create a Things list under a List Group by name or stable ID, optionally with ordered headings and tasks.',
           inputSchema: zodToJsonSchema(createListSchema),
         },
         {

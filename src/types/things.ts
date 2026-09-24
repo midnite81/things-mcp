@@ -65,7 +65,28 @@ export interface CreateListInput {
   when?: string;
   deadline?: string;
   tags?: string[];
+  items?: CreateListItem[];
 }
+
+export interface CreateListHeadingItem {
+  type: 'heading';
+  title: string;
+  archived?: boolean;
+}
+
+export interface CreateListTodoItem {
+  type: 'to-do';
+  title: string;
+  notes?: string;
+  when?: string;
+  deadline?: string;
+  tags?: string[];
+  checklist?: string[];
+  completed?: boolean;
+  canceled?: boolean;
+}
+
+export type CreateListItem = CreateListHeadingItem | CreateListTodoItem;
 
 export interface ListGroupsInput {
   query?: string;

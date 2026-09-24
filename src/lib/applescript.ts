@@ -36,36 +36,34 @@ export const defaultAppleScriptRunner = new DefaultAppleScriptRunner();
 
 export const JSON_ESCAPE_APPLESCRIPT = `
 on jsonEscape(strVal)
+  set quoteChar to character id 34
+  set slashChar to character id 92
+  set lineFeedChar to character id 10
+  set returnChar to character id 13
+  set tabChar to character id 9
   if strVal is missing value then
-    return "\\\"\\\""
+    return quoteChar & quoteChar
   end if
   set s to strVal as text
-  set AppleScript's text item delimiters to "\\\\"
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\\\\\"
-  set s to parts as text
+  set escapedText to ""
+  repeat with charRef in characters of s
+    set currentChar to contents of charRef
+    if currentChar is slashChar then
+      set escapedText to escapedText & slashChar & slashChar
+    else if currentChar is quoteChar then
+      set escapedText to escapedText & slashChar & quoteChar
+    else if currentChar is lineFeedChar then
+      set escapedText to escapedText & slashChar & "n"
+    else if currentChar is returnChar then
+      set escapedText to escapedText & slashChar & "r"
+    else if currentChar is tabChar then
+      set escapedText to escapedText & slashChar & "t"
+    else
+      set escapedText to escapedText & currentChar
+    end if
+  end repeat
 
-  set AppleScript's text item delimiters to "\\\""
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\\\\""
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 10)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\n"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 13)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\r"
-  set s to parts as text
-
-  set AppleScript's text item delimiters to (ASCII character 9)
-  set parts to text items of s
-  set AppleScript's text item delimiters to "\\\\t"
-  set s to parts as text
-
-  return "\\\"" & s & "\\\""
+  return quoteChar & escapedText & quoteChar
 end jsonEscape
 `;
 
