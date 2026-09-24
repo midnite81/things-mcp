@@ -5,7 +5,7 @@
   "author": "Simon Rogers <webdev@midnite.uk>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/midnite81/things-mcp.git"
+    "url": "git+https://github.com/midnite81/things-mcp.git"
   },
   "homepage": "https://github.com/midnite81/things-mcp#readme",
   "bugs": {
@@ -27,7 +27,7 @@
     "things-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/index.js",
     "prepack": "npm run build",
     "prepublishOnly": "npm test && npm run typecheck",
     "start": "node dist/index.js",
