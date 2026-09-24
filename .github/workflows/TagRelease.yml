@@ -38,6 +38,7 @@ jobs:
         with:
           ref: ${{ vars.RELEASE_BASE_BRANCH }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate release configuration
         run: |
