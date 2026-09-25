@@ -34,7 +34,7 @@ In this MCP server:
 - Node.js (v18+ recommended, tested with v20+)
 - npm
 
-### Run with `npx` (after the package is published)
+### Run with `npx`
 
 No global installation is needed. Configure your MCP client to run:
 
